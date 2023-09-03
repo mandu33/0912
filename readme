@@ -1,0 +1,4 @@
+eg运行user服务
+cd user
+sh build.sh
+sh output/bootstrap.sh
