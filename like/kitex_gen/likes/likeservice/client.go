@@ -4,9 +4,9 @@ package likeservice
 
 import (
 	"context"
+	likes "pro2/like/kitex_gen/likes"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
-	likes "pro2/like/kitex_gen/likes"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.

@@ -1,17 +1,20 @@
 package mysql
-import(
+
+import (
 	"context"
-    "time"
+	"time"
+
 	"gorm.io/gorm"
 	// "gorm.io/plugin/dbresolver"
 )
-// var db = getDB() 
+
+// var db = getDB()
 
 type Video struct {
 	gorm.Model
-	PublishTime     time.Time `gorm:"column:update_time;not null;index:idx_update" `
-	Author        User      `gorm:"foreignkey:AuthorID"`
-	UserID      int       `gorm:"index:idx_authorid;not null"`
+	PublishTime   time.Time `gorm:"column:update_time;not null;index:idx_update" `
+	Author        User      `gorm:"foreignkey:UserID"`
+	UserID        int       `gorm:"index:idx_authorid;not null"`
 	PlayUrl       string    `gorm:"type:varchar(255);not null"`
 	CoverUrl      string    `gorm:"type:varchar(255)"`
 	FavoriteCount int       `gorm:"default:0"`
@@ -19,6 +22,9 @@ type Video struct {
 	Title         string    `gorm:"type:varchar(50);not null"`
 }
 
+func (Video) TableName() string {
+	return "videos"
+}
 func GetVideos(ctx context.Context, limit int, latestTime *int64) ([]*Video, error) {
 	videos := make([]*Video, 0)
 

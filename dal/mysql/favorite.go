@@ -12,7 +12,7 @@ import (
 
 type Favorite struct {
 	Video    Video     `gorm:"foreignkey:VideoID;" json:"video,omitempty"`
-	VideoID  int64     `gorm:"index:idx_videoid;not null" json:"video_id"`
+	VideoID  uint      `gorm:"index:idx_videoid;not null" json:"video_id"`
 	User     User      `gorm:"foreignkey:UserID;" json:"user,omitempty"`
 	UserID   uint      `gorm:"index:idx_userid;not null" json:"user_id"`
 	LikeTime time.Time `gorm:"not null;index:idx_create" json:"created_at,omitempty"`
@@ -23,10 +23,10 @@ func (Favorite) TableName() string {
 }
 
 // 点赞
-func CreateFavorite(ctx context.Context, userId int64, videoId int64, authorId int64) error {
+func CreateFavorite(ctx context.Context, userId int64, videoId int64) error {
 	err := db.Clauses(dbresolver.Write).WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 新增点赞
-		err := tx.Create(&Favorite{UserID: uint(userId), VideoID: videoId}).Error
+		err := tx.Create(&Favorite{UserID: uint(userId), VideoID: uint(videoId)}).Error
 		if err != nil {
 			return err
 		}
@@ -51,10 +51,10 @@ func CreateFavorite(ctx context.Context, userId int64, videoId int64, authorId i
 		// }
 
 		//4.改变视频拥有者用户表中的获赞次数
-		res = tx.Model(&User{}).Where("id = ?", authorId).Update("total_favorited", gorm.Expr("total_favorited + ?", 1))
-		if res.Error != nil {
-			return err
-		}
+		// res = tx.Model(&User{}).Where("id = ?", authorId).Update("total_favorited", gorm.Expr("total_favorited + ?", 1))
+		// if res.Error != nil {
+		// 	return err
+		// }
 		// if res.RowsAffected != 1 {
 		// 	return errno.ErrDatabase
 		// }
@@ -65,7 +65,7 @@ func CreateFavorite(ctx context.Context, userId int64, videoId int64, authorId i
 }
 
 // 取消点赞
-func DeleteFavorite(ctx context.Context, userId int64, videoId int64, authorId int64) error {
+func DeleteFavorite(ctx context.Context, userId int64, videoId int64) error {
 	err := db.Clauses(dbresolver.Write).WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		Favorite := new(Favorite)
 		if err := tx.Where("user_id = ? and video_id = ?", userId, videoId).First(&Favorite).Error; err != nil {
@@ -100,10 +100,10 @@ func DeleteFavorite(ctx context.Context, userId int64, videoId int64, authorId i
 		// }
 
 		// 视频拥有者用户表中的获赞总数
-		res = tx.Model(&User{}).Where("id = ?", authorId).Update("total_favorited", gorm.Expr("total_favorited - ?", 1))
-		if res.Error != nil {
-			return err
-		}
+		// res = tx.Model(&User{}).Where("id = ?", authorId).Update("total_favorited", gorm.Expr("total_favorited - ?", 1))
+		// if res.Error != nil {
+		// 	return err
+		// }
 		// if res.RowsAffected != 1 {
 		// 	return errno.ErrDatabase
 		// }
@@ -114,18 +114,10 @@ func DeleteFavorite(ctx context.Context, userId int64, videoId int64, authorId i
 }
 
 // 根据id查看个人点赞视频列表
-func GetFavoriteList(ctx context.Context, userId int64) ([]int64, error) {
-	FavoriteList := make([]int64, 0)
-	favorites := make([]*Favorite, 0)
-
-	err := db.Clauses(dbresolver.Read).WithContext(ctx).Select("video_id").Where("user_id = ?", userId).Find(&favorites).Error
-	if err != nil {
+func GetFavoriteList(ctx context.Context, userId int64) ([]Video, error) {
+	var FavoriteVideoList []Video
+	if err := db.Clauses(dbresolver.Write).WithContext(ctx).Where("user_id = ?", userId).Find(&FavoriteVideoList).Error; err != nil {
 		return nil, err
 	}
-
-	for _, ff := range favorites {
-		FavoriteList = append(FavoriteList, ff.VideoID)
-	}
-
-	return FavoriteList, nil
+	return FavoriteVideoList, nil
 }

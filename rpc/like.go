@@ -8,17 +8,18 @@ import (
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
+	etcd "github.com/kitex-contrib/registry-etcd"
 )
 
 var likeClient likeservice.Client
 
 func InitLikeRpc() {
-	// EtcdAddress := "127.0.0.1:2379"
+	EtcdAddress := "127.0.0.1:9001"
 	// // EtcdAddress := fmt.Sprintf("%s:%d", Config.Viper.GetString("Etcd.Address"), Config.Viper.GetInt("Etcd.Port"))
-	// r, err := etcd.NewEtcdResolver([]string{EtcdAddress})
-	// if err != nil {
-	// 	panic(err)
-	// }
+	r, err := etcd.NewEtcdResolver([]string{EtcdAddress})
+	if err != nil {
+		panic(err)
+	}
 
 	c, err := likeservice.NewClient(
 		"likeservice", //服务名称
@@ -29,7 +30,7 @@ func InitLikeRpc() {
 		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
 		// client.WithSuite(trace.NewDefaultClientSuite()),   // tracer
-		//client.WithResolver(r), // resolver
+		client.WithResolver(r), // resolver
 	)
 	if err != nil {
 		panic(err)

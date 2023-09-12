@@ -173,7 +173,7 @@ func (x *DouyinRelationFollowListResponse) fastReadField3(buf []byte, _type int8
 	if err != nil {
 		return offset, err
 	}
-	x.UserList = &v
+	x.UserList = append(x.UserList, &v)
 	return offset, nil
 }
 
@@ -258,7 +258,7 @@ func (x *DouyinRelationFollowerListResponse) fastReadField3(buf []byte, _type in
 	if err != nil {
 		return offset, err
 	}
-	x.UserList = &v
+	x.UserList = append(x.UserList, &v)
 	return offset, nil
 }
 
@@ -468,7 +468,7 @@ func (x *DouyinRelationFriendListResponse) fastReadField3(buf []byte, _type int8
 	if err != nil {
 		return offset, err
 	}
-	x.UserList = &v
+	x.UserList = append(x.UserList, &v)
 	return offset, nil
 }
 
@@ -731,7 +731,9 @@ func (x *DouyinRelationFollowListResponse) fastWriteField3(buf []byte) (offset i
 	if x.UserList == nil {
 		return offset
 	}
-	offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList())
+	for i := range x.GetUserList() {
+		offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList()[i])
+	}
 	return offset
 }
 
@@ -790,7 +792,9 @@ func (x *DouyinRelationFollowerListResponse) fastWriteField3(buf []byte) (offset
 	if x.UserList == nil {
 		return offset
 	}
-	offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList())
+	for i := range x.GetUserList() {
+		offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList()[i])
+	}
 	return offset
 }
 
@@ -955,7 +959,9 @@ func (x *DouyinRelationFriendListResponse) fastWriteField3(buf []byte) (offset i
 	if x.UserList == nil {
 		return offset
 	}
-	offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList())
+	for i := range x.GetUserList() {
+		offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList()[i])
+	}
 	return offset
 }
 
@@ -1197,7 +1203,9 @@ func (x *DouyinRelationFollowListResponse) sizeField3() (n int) {
 	if x.UserList == nil {
 		return n
 	}
-	n += fastpb.SizeMessage(3, x.GetUserList())
+	for i := range x.GetUserList() {
+		n += fastpb.SizeMessage(3, x.GetUserList()[i])
+	}
 	return n
 }
 
@@ -1256,7 +1264,9 @@ func (x *DouyinRelationFollowerListResponse) sizeField3() (n int) {
 	if x.UserList == nil {
 		return n
 	}
-	n += fastpb.SizeMessage(3, x.GetUserList())
+	for i := range x.GetUserList() {
+		n += fastpb.SizeMessage(3, x.GetUserList()[i])
+	}
 	return n
 }
 
@@ -1421,7 +1431,9 @@ func (x *DouyinRelationFriendListResponse) sizeField3() (n int) {
 	if x.UserList == nil {
 		return n
 	}
-	n += fastpb.SizeMessage(3, x.GetUserList())
+	for i := range x.GetUserList() {
+		n += fastpb.SizeMessage(3, x.GetUserList()[i])
+	}
 	return n
 }
 

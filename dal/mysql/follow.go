@@ -1,24 +1,33 @@
 package mysql
-import(
+
+import (
 	"context"
 	"time"
+
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 )
+
 // var db = getDB() //连接池对象
 // CREATE TABLE follows (
-// 	id INT AUTO_INCREMENT PRIMARY KEY,
-// 	user_id VARCHAR(255) NOT NULL,
-// 	dst_id VARCHAR(255) NOT NULL,
-// 	follow_time DATETIME NOT NULL
+//
+//	id INT AUTO_INCREMENT PRIMARY KEY,
+//	user_id VARCHAR(255) NOT NULL,
+//	dst_id VARCHAR(255) NOT NULL,
+//	follow_time DATETIME NOT NULL
+//
 // );
-type Follow struct{
+type Follow struct {
 	gorm.Model
-	userID uint `gorm:"index:idx_userid;not null" json:"user_id"`
-	user User `gorm:"foreignkey:userID;" json:"user,omitempty"`
-	dstID uint `gorm:"index:idx_userid;index:idx_userid_to;not null" json:"dst_id"`
-	dstUser User `gorm:"foreignkey:dstID;" json:"dstUser,omitempty"`
-	followTime time.Time `gorm:"not null;index:idx_create" json:"created_at,omitempty"`
+	UserID     uint      `gorm:"index:idx_userid;not null" json:"user_id"`
+	User       User      `gorm:"foreignkey:UserID;" json:"user,omitempty"`
+	DstID      uint      `gorm:"index:idx_userid;index:idx_userid_to;not null" json:"dst_id"`
+	DstUser    User      `gorm:"foreignkey:DstID;" json:"dstUser,omitempty"`
+	FollowTime time.Time `gorm:"not null;index:idx_create" json:"created_at,omitempty"`
+}
+
+func (Follow) TableName() string {
+	return "follows"
 }
 func GetFollow(ctx context.Context, uid int64, tid int64) (*Follow, error) {
 	follow := new(Follow)
@@ -28,12 +37,12 @@ func GetFollow(ctx context.Context, uid int64, tid int64) (*Follow, error) {
 	}
 	return follow, nil
 }
-//关注
+
+// 关注
 func GetFollowing(ctx context.Context, uid int64, tid int64) error {
 	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 在事务中执行一些 db 操作（从这里开始，您应该使用 'tx' 而不是 'db'）
-		// 1. 新增关注数据
-		err := tx.Create(&Follow{userID: uint(uid), dstID: uint(tid)}).Error
+
+		err := tx.Create(&Follow{UserID: uint(uid), DstID: uint(tid)}).Error
 		if err != nil {
 			return err
 		}
@@ -62,7 +71,8 @@ func GetFollowing(ctx context.Context, uid int64, tid int64) error {
 	})
 	return err
 }
-//取关
+
+// 取关
 func DeleteFollowing(ctx context.Context, uid int64, tid int64) error {
 	err := db.Clauses(dbresolver.Write).WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 在事务中执行一些 db 操作（从这里开始，您应该使用 'tx' 而不是 'db'）

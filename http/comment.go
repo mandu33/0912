@@ -1,29 +1,32 @@
 package http
-import(
+
+import (
+	"context"
 	"net/http"
-	"strconv"
-	"github.com/gin-gonic/gin"
 	"pro2/comment/kitex_gen/comment"
 	"pro2/rpc"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
-func CommentActionHandler(c *gin.Context){
-	
+func CommentActionHandler(c *gin.Context) {
+
 	token := c.Query("token")
 	video_id := c.Query("video_id")
 	action_type := c.Query("action_type")
 
 	vid, err := strconv.Atoi(video_id)
 
-	if err!=nil {
-		SendResponse(c, err)
+	if err != nil {
+		SendCommentResponse(c, err)
 		return
 	}
 
 	acty, err := strconv.Atoi(action_type)
 
-	if err!=nil {
-		SendResponse(c, err)
+	if err != nil {
+		SendCommentResponse(c, err)
 		return
 	}
 
@@ -35,47 +38,47 @@ func CommentActionHandler(c *gin.Context){
 	// 1-发布评论，2-删除评论
 	if acty == 1 {
 		comment_text := c.Query("comment_text")
-		rpc_Req.CommentText = &comment_text
+		rpc_Req.CommentText = comment_text
 	} else {
 		comment_id := c.Query("comment_id")
 		c_id, err := strconv.Atoi(comment_id)
 
-		if err!=nil {
-			SendResponse(c, err)
+		if err != nil {
+			SendCommentResponse(c, err)
 			return
 		}
 
-		c_id64 := int64(cid)
-		rpc_Req.CommentId = &c_id64
+		c_id64 := int64(c_id)
+		rpc_Req.CommentId = c_id64
 	}
 
 	resp, err := rpc.CommentAction(context.Background(), &rpc_Req)
 
-	if err!=nil {
-		SendResponse(c, err)
+	if err != nil {
+		SendCommentResponse(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
-		"Data": resp,
-    })
+		"Data":    resp,
+	})
 
 }
 
-func CommentListHandler(c *gin.Context){
-    video_id, err := strconv.Atoi(c.Query("video_id"))
-	if err!=nil {
-		SendResponse(c, err)
+func CommentListHandler(c *gin.Context) {
+	video_id, err := strconv.Atoi(c.Query("video_id"))
+	if err != nil {
+		SendCommentResponse(c, err)
 		return
 	}
 
 	VideoId := int64(video_id)
-    Token := c.Query("token")
+	Token := c.Query("token")
 
 	if len(Token) == 0 || VideoId < 0 {
-		SendResponse(c, err)
+		SendCommentResponse(c, err)
 		return
 	}
 
@@ -87,16 +90,15 @@ func CommentListHandler(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
-		"Data": resp
-    })
-    
-	
+		"Data":    resp,
+	})
+
 }
 
-func SendResponse(c *gin.Context, err error) {
-    // always return http.StatusOK
+func SendCommentResponse(c *gin.Context, err error) {
+	// always return http.StatusOK
 	c.JSON(http.StatusOK, gin.H{
 		"code":    -1,
 		"message": "error",
-    })
+	})
 }

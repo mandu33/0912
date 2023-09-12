@@ -1,25 +1,27 @@
 package mysql
+
 import (
 	"context"
+
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
-	
 )
+
 // 评论属于视频和用户
 type Comment struct {
-	gorm.Model   
-	Video      Video          `gorm:"foreignkey:VideoID" json:"video,omitempty"`
-	VideoID    uint           `gorm:"index:idx_videoid;not null" json:"video_id"`
-	User       User           `gorm:"foreignkey:UserID" json:"user,omitempty"`
-	UserID     uint           `gorm:"index:idx_userid;not null" json:"user_id"`
-	Content    string         `gorm:"type:varchar(255);not null" json:"content"`
-
+	gorm.Model
+	Video   Video  `gorm:"foreignkey:VideoID" json:"video,omitempty"`
+	VideoID uint   `gorm:"index:idx_videoid;not null" json:"video_id"`
+	User    User   `gorm:"foreignkey:UserID" json:"user,omitempty"`
+	UserID  uint   `gorm:"index:idx_userid;not null" json:"user_id"`
+	Content string `gorm:"type:varchar(255);not null" json:"content"`
 }
 
 func (Comment) TableName() string {
 	return "comment"
 }
-//增加评论
+
+// 增加评论
 func AddComment(ctx context.Context, comment *Comment) error {
 	err := db.Clauses(dbresolver.Write).WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 在事务中执行一些 db 操作（从这里开始，您应该使用 'tx' 而不是 'db'）
@@ -44,6 +46,7 @@ func AddComment(ctx context.Context, comment *Comment) error {
 	})
 	return err
 }
+
 // 删除评论
 func DeleteComment(ctx context.Context, commentId int64, videoId int64) error {
 	err := db.Clauses(dbresolver.Write).WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -53,7 +56,7 @@ func DeleteComment(ctx context.Context, commentId int64, videoId int64) error {
 		} else if err == gorm.ErrRecordNotFound {
 			return nil
 		}
-        // 删除评论表
+		// 删除评论表
 		err := tx.Where("id = ?", commentId).Delete(&Comment{}).Error
 		if err != nil {
 			return err
